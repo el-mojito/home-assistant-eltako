@@ -48,6 +48,7 @@ from .const import *
 from . import get_gateway_from_hass, get_device_config_for_gateway
 
 DEFAULT_DEVICE_NAME_WINDOW_HANDLE = "Window handle"
+DEFAULT_DEVICE_NAME_WINDOW_HANDLE_EXT = "Window handle ext"
 DEFAULT_DEVICE_NAME_WEATHER_STATION = "Weather station"
 DEFAULT_DEVICE_NAME_ELECTRICITY_METER = "Electricity meter"
 DEFAULT_DEVICE_NAME_GAS_METER = "Gas meter"
@@ -69,6 +70,7 @@ SENSOR_TYPE_HUMIDITY = "humidity"
 SENSOR_TYPE_VOLTAGE = "voltage"
 SENSOR_TYPE_PIR = "pir"
 SENSOR_TYPE_WINDOWHANDLE = "windowhandle"
+SENSOR_TYPE_WINDOWHANDLE_EXT = "windowhandle_ext"
 SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_DAWN = "weather_station_illuminance_dawn"
 SENSOR_TYPE_WEATHER_STATION_TEMPERATURE = "weather_station_temperature"
 SENSOR_TYPE_WEATHER_STATION_WIND_SPEED = "weather_station_wind_speed"
@@ -147,6 +149,17 @@ SENSOR_DESC_WATER_CURRENT = EltakoSensorEntityDescription(
 SENSOR_DESC_WINDOWHANDLE = EltakoSensorEntityDescription(
     key=SENSOR_TYPE_WINDOWHANDLE,
     name="Window handle",
+    icon="mdi:window-open-variant",
+    device_class='window',
+    native_unit_of_measurement=None,
+    suggested_display_precision=None,
+    suggested_unit_of_measurement=None,
+    state_class=None
+)
+
+SENSOR_DESC_WINDOWHANDLE_EXT = EltakoSensorEntityDescription(
+    key=SENSOR_TYPE_WINDOWHANDLE_EXT,
+    name="Window handle ext",
     icon="mdi:window-open-variant",
     device_class='window',
     native_unit_of_measurement=None,
@@ -314,11 +327,17 @@ async def async_setup_entry(
                     entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_CENTRAL))
                     entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_EAST))
                     
-                elif dev_conf.eep in [F6_10_00]:
+                elif dev_conf.eep in [F6_10_00]: #[A5_14_09, F6_10_00]:
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_WINDOW_HANDLE
                     
                     entities.append(EltakoWindowHandle(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WINDOWHANDLE))
+                    
+                elif dev_conf.eep in [A5_14_09]:
+                    if dev_name == "":
+                        dev_name = DEFAULT_DEVICE_NAME_WINDOW_HANDLE_EXT
+                    
+                    entities.append(EltakoWindowHandleExt(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WINDOWHANDLE_EXT))
                     
                 elif dev_conf.eep in [A5_12_01]:
                     if dev_name == "":
@@ -611,6 +630,35 @@ class EltakoWindowHandle(EltakoSensor):
 
         self.schedule_update_ha_state()
 
+class EltakoWindowHandleExt(EltakoSensor):
+    """Representation of an Eltako window handle device.
+
+    EEPs (EnOcean Equipment Profiles):
+    - A5-14-09
+    """
+
+    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription) -> None:
+        """Initialize the Eltako window handle sensor device."""
+        super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
+
+    def value_changed(self, msg: ESP2Message):
+        """Update the internal state of the sensor."""
+        try:
+            decoded:A5_14_09 = self.dev_eep.decode_message(msg)
+        except Exception as e:
+            LOGGER.warning("[Window Handle Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            return
+        
+        if decoded.handle_position == WindowHandlePosition.CLOSED:
+            self._attr_native_value = STATE_CLOSED
+        elif decoded.handle_position == WindowHandlePosition.OPEN:
+            self._attr_native_value = STATE_OPEN
+        elif decoded.handle_position == WindowHandlePosition.TILT:
+            self._attr_native_value = "tilt"
+        else:
+            return
+
+        self.schedule_update_ha_state()
 
 class EltakoWeatherStation(EltakoSensor):
     """Representation of an Eltako weather station.

@@ -41,6 +41,7 @@ Elatko devices are exemplarily mentioned. You can find [here](https://www.eltako
   * A5-12-02 (Automated meter reading - gas, F3Z14D)
   * A5-12-03 (Automated meter reading - water, F3Z14D)
   * A5-13-01 (Weather station, FWG14)
+  * A5-14-09 (Window handle)
   * F6-10-00 (Window handle, classic switches or contacs via FTS14EM, window and door contacts like FTKE, supported states: open, closed, tilt)
 * [Light](https://github.com/grimmpp/home-assistant-eltako/tree/main/docs/lights-tutorial/readme.md)
   * A5-38-08 (Dimmable Light: Central command - gateway, FUD14)
