@@ -1,6 +1,6 @@
 aiocoap
 pyserial-asyncio
-eltako14bus==0.0.61
+git+https://github.com/el-mojito/eltako14bus.git@feature/implement_EEP_A5-14-09#egg=eltako14bus
 enocean>=0.60.1
 homeassistant
 termcolor
