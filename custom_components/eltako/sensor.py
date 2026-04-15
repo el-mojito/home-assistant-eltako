@@ -56,7 +56,7 @@ DEFAULT_DEVICE_NAME_HYGROSTAT = "Hygrostat"
 DEFAULT_DEVICE_NAME_THERMOMETER = "Thermometer"
 DEFAULT_DEVICE_NAME_AIR_QUAILTY_SENSOR = "Air Quality Sensor"
 
-SENSOR_TYPE_BATTERY_VOLTAGE = "electricity_voltage"
+SENSOR_TYPE_BATTERY_VOLTAGE = "battery_voltage"
 SENSOR_TYPE_ELECTRICITY_CUMULATIVE = "electricity_cumulative"
 SENSOR_TYPE_ELECTRICITY_CURRENT = "electricity_current"
 SENSOR_TYPE_GAS_CUMULATIVE = "gas_cumulative"
@@ -88,8 +88,9 @@ SENSOR_DESC_BATTERY_VOLTAGE = EltakoSensorEntityDescription(
     name="Battery Voltage",
     native_unit_of_measurement=UnitOfElectricPotential.VOLT,
     icon="mdi:lightning-bolt",
-    device_class=SensorDeviceClass.BATTERY,
+    device_class=SensorDeviceClass.VOLTAGE,
     state_class=SensorStateClass.MEASUREMENT,
+    suggested_display_precision=2,
 )
 
 SENSOR_DESC_ELECTRICITY_CUMULATIVE = EltakoSensorEntityDescription(
