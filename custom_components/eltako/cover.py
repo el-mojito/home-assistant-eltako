@@ -19,6 +19,7 @@ from .config_helpers import DeviceConf
 from .gateway import EnOceanGateway
 from .const import CONF_SENDER, CONF_TIME_CLOSES, CONF_TIME_OPENS, CONF_TIME_TILTS, DOMAIN, MANUFACTURER, LOGGER
 from . import get_gateway_from_hass, get_device_config_for_gateway
+import asyncio
 import time
 
 async def async_setup_entry(
@@ -322,7 +323,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.schedule_update_ha_state()
 
 
-    def set_cover_tilt_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
         address, _ = self._sender_id
         tilt_position = kwargs[ATTR_TILT_POSITION]
         
@@ -343,7 +344,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             
             msg = H5_3F_7F(0, command, 1).encode_message(address)
             self.send_message(msg)
-            time.sleep(sleeptime)
+            await asyncio.sleep(sleeptime)
             
             msg = H5_3F_7F(0, 0x00, 1).encode_message(address)
             self.send_message(msg)
